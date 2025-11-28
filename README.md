@@ -2,7 +2,7 @@
 
 首先得到的是在pm或者hssd_data下面的子模型文件，形如下图这样的结构
 
-![image-20251128200658032](C:\Users\26871\AppData\Roaming\Typora\typora-user-images\image-20251128200658032.png)
+<img width="505" height="469" alt="object" src="https://github.com/user-attachments/assets/adb40405-0075-4d3a-8ade-0cd9aac1da7d" />
 
 ## 前提需求：
 
@@ -32,7 +32,7 @@ git clone https://github.com/FFTAI/Wiki-GRx-MJCF.git
 
 随后还需要把XML文件进行处理，把obj的绝对路径转化为相对路径，在此需要调用fix_xml.py文件。fixed的结果如下所示：
 
-![image-20251128202127804](C:\Users\26871\AppData\Roaming\Typora\typora-user-images\image-20251128202127804.png)
+<img width="2112" height="815" alt="xml" src="https://github.com/user-attachments/assets/e91a3e69-3fb2-4690-85fb-fca8c0ab6429" />
 
 注意进行转化需要在模型文件夹路径下面。
 
@@ -46,4 +46,4 @@ python ./convert_mjcf.py model_fixed.xml model.usda。
 
 现在的USDA打开就是正常的了：
 
-![image-20251128202335061](C:\Users\26871\AppData\Roaming\Typora\typora-user-images\image-20251128202335061.png)
+<img width="2478" height="1332" alt="usda" src="https://github.com/user-attachments/assets/96dc6251-fbac-4544-8007-37b2368f94ce" />
