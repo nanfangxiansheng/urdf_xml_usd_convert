@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-fix_obj_geom_recursive.py
+fix_obj_geom_recursive.py (modified)
 
 递归处理目录中的所有 OBJ 文件，解决：
 
@@ -27,6 +27,11 @@ fix_obj_geom_recursive.py
   * 否则：
       -> 检测退化轴，对退化轴做“厚度拉伸”（QJ 风格），保持拓扑不变，只改坐标。
 - 覆盖写回 OBJ，原文件备份为 .bak。
+
+修改说明：
+- 新增逻辑：在对每个 .obj 处理前，若存在同名 .obj.bak（备份），则优先读取该 .bak 文件作为源（但不删除/覆盖 .bak），并将处理结果写回到 .obj（保留 .bak 不变）。
+- 修改写回逻辑：如果目标 .bak 已经存在，则写回时**不再尝试用旧的 .obj 去覆盖/替换 .bak**，以保证原始 .bak 始终保留。
+
 """
 
 import argparse
@@ -38,6 +43,7 @@ import numpy as np
 
 
 # ======================= CLI 参数 =======================
+
 
 def parse_args():
     p = argparse.ArgumentParser(
@@ -93,6 +99,7 @@ def parse_args():
 
 # ======================= 文本级语法修复 =======================
 
+
 def sanitize_obj_lines(raw_lines: List[str]) -> List[str]:
     """
     修复类似：
@@ -134,6 +141,7 @@ def sanitize_obj_lines(raw_lines: List[str]) -> List[str]:
 
 # ======================= 解析顶点 & 面 =======================
 
+
 def load_obj_vertices_faces(path: str):
     """
     读取 OBJ：
@@ -172,6 +180,7 @@ def load_obj_vertices_faces(path: str):
 
 
 # ======================= 退化轴检测 & 厚度拉伸 =======================
+
 
 def detect_degenerate_axes(verts: np.ndarray, rel_tol: float, abs_tol: float):
     mins = verts.min(axis=0)
@@ -227,6 +236,7 @@ def inflate_degenerate_axes(
 
 # ======================= 四面体构造（处理唯一顶点数 < 4） =======================
 
+
 def ensure_three_base_points(uniq_verts: np.ndarray) -> np.ndarray:
     """
     确保有 3 个用于构造四面体的“底面点”：
@@ -273,6 +283,8 @@ def make_tetra_from_points(
     - v4 = 质心 + thickness * 法线
     返回新的 OBJ 文本行列表。
     """
+
+
     (x1, y1, z1), (x2, y2, z2), (x3, y3, z3) = base3
 
     ux, uy, uz = x2 - x1, y2 - y1, z2 - z1
@@ -313,23 +325,32 @@ def make_tetra_from_points(
     return lines
 
 
+# ======================= 写回 OBJ（只改顶点坐标） =======================
+
+
 def write_obj_inplace_simple(path: str, new_lines: List[str]):
     """
     直接用 new_lines 覆盖写回 OBJ（适用于四面体这种完全重写的情况）。
+    修改：如果已经存在 path + '.bak'，则**不**用当前 path 去覆盖/替换该 .bak，
+    而是直接写回 path（并保留已有的 .bak）。
     """
     backup = path + ".bak"
-    if not os.path.exists(backup):
-        os.rename(path, backup)
-    else:
-        os.remove(backup)
-        os.rename(path, backup)
 
+    # 如果没有备份，则把原始 obj 作为备份；若备份已存在，则保留它不动
+    if not os.path.exists(backup) and os.path.exists(path):
+        try:
+            os.rename(path, backup)
+        except Exception:
+            # 若重命名失败（权限或其它），尝试用复制的方式保留备份
+            import shutil
+
+            shutil.copy2(path, backup)
+
+    # 写回新的 obj 文件
     with open(path, "w", encoding="utf-8") as f:
         for line in new_lines:
             f.write(line)
 
-
-# ======================= 写回 OBJ（只改顶点坐标） =======================
 
 def write_obj_inplace_with_verts(
     path: str,
@@ -339,13 +360,18 @@ def write_obj_inplace_with_verts(
 ):
     """
     保留原始结构，仅替换 v 行的坐标。
+
+    修改：如果 path+'.bak' 已存在，则不覆盖该 bak 文件；否则在首次写入时创建 bak。
     """
     backup_path = path + ".bak"
-    if not os.path.exists(backup_path):
-        os.rename(path, backup_path)
-    else:
-        os.remove(backup_path)
-        os.rename(path, backup_path)
+    # 只有在没有备份且目标文件存在的情况下，才把原 obj 重命名为 bak
+    if not os.path.exists(backup_path) and os.path.exists(path):
+        try:
+            os.rename(path, backup_path)
+        except Exception:
+            import shutil
+
+            shutil.copy2(path, backup_path)
 
     verts_iter = iter(verts_new)
     v_line_set = set(v_line_indices)
@@ -361,6 +387,34 @@ def write_obj_inplace_with_verts(
 
 # ======================= 单文件处理 =======================
 
+def save_obj_with_perturbed_vertices(path: str, lines: list, verts: np.ndarray, v_line_indices: list):
+    """
+    将扰动后的 verts 写回 OBJ 文件对应的顶点行。
+
+    Args:
+        path: 原 OBJ 文件路径
+        lines: 原始且修复后的 OBJ 文本行
+        verts: 扰动后的顶点数组 (N, 3)
+        v_line_indices: 对应 verts 的行号 index，用来替换 OBJ 中顶点部分
+    """
+
+    if len(verts) != len(v_line_indices):
+        raise ValueError("verts 与 v_line_indices 数量不匹配，写回失败！")
+
+    # 更新对应行
+    for vert, line_idx in zip(verts, v_line_indices):
+        x, y, z = vert
+        # 按原格式写回，保留高精度
+        lines[line_idx] = f"v {x:.8f} {y:.8f} {z:.8f}\n"
+
+    # 写回文件，覆盖保存
+    #new_path = path.replace(".obj", "_perturbed.obj")
+    with open(path, "w", encoding="utf-8") as f:
+        f.writelines(lines)
+
+    print(f"✔ 已写入扰动后的 OBJ 文件：{path}")
+    return path
+
 def process_obj_file(
     path: str,
     rel_tol: float,
@@ -369,17 +423,39 @@ def process_obj_file(
     tetra_thickness: float,
     dry_run: bool,
 ) -> bool:
+    """
+    新增逻辑：如果存在 path + '.bak'，则以该 bak 文件作为**源**来加载和处理，
+    但写回仍然写到 path（.obj），并保持 .bak 不被覆盖/删除。
+    """
+    bak_path = path + ".bak"
+    source_path = path
+    source_was_bak = False
+
+    if os.path.exists(bak_path):
+        # 优先读取 bak，保留 bak 不动
+        source_path = bak_path
+        source_was_bak = True
+
     try:
-        lines, verts, v_idx, face_count = load_obj_vertices_faces(path)
+        lines, verts, v_idx, face_count = load_obj_vertices_faces(source_path)#默认source_path是正常的
     except ValueError as e:
         print(f"[SKIP] {path}: {e}")
         return False
-
-    mins = verts.min(axis=0)
-    maxs = verts.max(axis=0)
+    #print(f"origin_verts:{verts}")
+    epsilon = 1e-4
+    randomized_verts = verts + (np.random.rand(*verts.shape) - 0.5) * 2 * epsilon#强行加上扰动值
+    
+    save_obj_with_perturbed_vertices(path, lines, randomized_verts, v_idx)#把值最终写入path中，保持source_path不变动
+    try:
+        lines, verts, v_idx, face_count = load_obj_vertices_faces(path)#加载path中的信息
+    except ValueError as e:
+        print(f"[SKIP] {path}: {e}")
+        return False
     ranges, deg_mask = detect_degenerate_axes(verts, rel_tol, abs_tol)
-
-    print(f"\n[FILE] {path}")
+    #print(f"randomized:{verts}")
+    mins = verts.min(axis=0)
+    maxs = verts.max(axis=0)    
+    print(f"\n[FILE] {path} (source: {'bak' if source_was_bak else 'obj'})")
     print(f"  顶点数: {verts.shape[0]}, 面数: {face_count}")
     print(f"  范围 X: {ranges[0]:.6g}, Y: {ranges[1]:.6g}, Z: {ranges[2]:.6g}")
 
@@ -410,8 +486,9 @@ def process_obj_file(
             print("  [DRY-RUN] 仅预览四面体替换，不写回。")
             return True
 
+        # 写回到 path（.obj），并确保原有 bak 不被覆盖
         write_obj_inplace_simple(path, tetra_lines)
-        print(f"  已重写为四面体（原文件备份为 {path}.bak）。")
+        print(f"  已重写为四面体（写回 {path}，原始 bak 保留为 {bak_path} 如果存在）。")
         return True
 
     # ---------- 情况2：顶点数够，但有退化轴 -> 做厚度拉伸 ----------
@@ -426,15 +503,17 @@ def process_obj_file(
             return True
 
         write_obj_inplace_with_verts(path, lines, verts_new, v_idx)
-        print(f"  已写回文件（原文件备份为 {path}.bak）。")
+        print(f"  已写回文件（写回 {path}，原始 bak 保留为 {bak_path} 如果存在）。")
         return True
 
     # ---------- 情况3：顶点数够，且无退化轴 -> 不用动 ----------
     print("  顶点数 >= 4 且未发现明显退化轴，不做任何修改。")
+
     return False
 
 
 # ======================= 主逻辑 =======================
+
 
 def main():
     args = parse_args()
@@ -481,4 +560,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

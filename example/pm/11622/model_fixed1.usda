@@ -1,0 +1,44 @@
+#usda 1.0
+(
+    defaultPrim = "model_fixed1"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "model_fixed1" (
+    variants = {
+        string Physics = "PhysX"
+        string Sensor = "Sensors"
+    }
+    prepend variantSets = ["Physics", "Sensor"]
+)
+{
+    variantSet "Physics" = {
+        "None" (
+            prepend references = @configuration/model_fixed1_base.usd@
+        ) {
+            over "joints" (
+                active = false
+            )
+            {
+            }
+
+        }
+        "PhysX" (
+            prepend payload = @configuration/model_fixed1_physics.usd@
+        ) {
+
+        }
+    }
+    variantSet "Sensor" = {
+        "None" {
+
+        }
+        "Sensors" (
+            prepend payload = @configuration/model_fixed1_sensor.usd@
+        ) {
+
+        }
+    }
+}
+

@@ -24,7 +24,7 @@
 urdf2mjcf model.urdf model.xml.
 ```
 
-urdf2mjcf来自仓库**WIKI-GRX-MJCF**。需要git clone下来：
+urdf2mjcf来自仓库**WIKI-GRX-MJCF**。需要git clone下来并按照其中的指导方法进行安装：
 
 ```bash
 git clone https://github.com/FFTAI/Wiki-GRx-MJCF.git
@@ -47,3 +47,25 @@ python ./convert_mjcf.py model_fixed.xml model.usda。
 现在的USDA打开就是正常的了：
 
 ![image-20251128202335061](C:\Users\26871\AppData\Roaming\Typora\typora-user-images\image-20251128202335061.png)
+## 批量转换脚本说明
+一共写了五个批量转换脚本。分别对应这五个步骤：
+- 1.转换所有object.json为urdf:**convert_json_to_urdf_batch.py**
+- 2.修复转换后的urdf和.obj文件中的几何错误:**fix_urdf_geoms_batch.py**
+- 3.转换所有urdf为xml:**convert_urdf_to_xml_batch.py**
+- 4.修复所有xml中的obj路径从绝对路径变为相对路径:**fix_xml_batch.sh**
+- 5.转换所有xml为usda:**convert_xml_to_usda_batch.py**
+
+注意：对于上面所有的批量处理脚本，都是不设置输入参数的，在使用前应当对其中的路径等信息自行处理。
+## 转换成功的示例：
+在examples下有两个成功的示例，可以从中进行学习。其中的pm来自于sapien平台的开源数据集，而hssd_data来自于hssd数据集。在转换成功的文件中可以看见如下的列表信息:
+- configuration文件夹：存放了组件usd和材质等文件
+- features文件夹：
+- imgs文件夹:
+- objs文件夹:存放了组件的points数据。其中有.obj,.mtl,.obj.bak(修改了obj后的备份文件)
+- plys文件夹:
+- textures文件夹:
+- model_fixed.urdf:转换后的urdf文件
+- model_fixed.xml:转换后的xml文件
+- model_fixed1.xml:修改obj绝对路径为相对路径后的xml文件
+- model_fixed1.usda:转换成功的usda文件
+- object.json:转换前的json文件

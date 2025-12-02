@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<mujoco model="articulated_object">
+  <compiler angle="radian"/>
+  <asset>
+    <mesh name="2c681d7e64e0410d76156f500cd2df798975a25d_part_1" content_type="model/obj" file="objs/2c681d7e64e0410d76156f500cd2df798975a25d_part_1.obj"/>
+    <mesh name="2c681d7e64e0410d76156f500cd2df798975a25d_part_2" content_type="model/obj" file="objs/2c681d7e64e0410d76156f500cd2df798975a25d_part_2.obj"/>
+    <mesh name="2c681d7e64e0410d76156f500cd2df798975a25d_part_3" content_type="model/obj" file="objs/2c681d7e64e0410d76156f500cd2df798975a25d_part_3.obj"/>
+    <mesh name="2c681d7e64e0410d76156f500cd2df798975a25d_part_4" content_type="model/obj" file="objs/2c681d7e64e0410d76156f500cd2df798975a25d_part_4.obj"/>
+    <mesh name="2c681d7e64e0410d76156f500cd2df798975a25d_part_5" content_type="model/obj" file="objs/2c681d7e64e0410d76156f500cd2df798975a25d_part_5.obj"/>
+  </asset>
+  <worldbody>
+    <body name="base_link">
+      <inertial pos="0 0 0" mass="10" diaginertia="0.1 0.1 0.1"/>
+      <geom type="mesh" mesh="2c681d7e64e0410d76156f500cd2df798975a25d_part_5"/>
+      <body name="drawer" pos="0.352616 0.503853 0.208335">
+        <inertial pos="-0.352616 -0.503853 -0.208335" mass="3" diaginertia="0.03 0.03 0.03"/>
+        <joint name="joint_drawer" pos="0 0 0" axis="-1e-06 0 1" type="slide" range="0 0.239646" actuatorfrcrange="-10 10"/>
+        <geom pos="-0.352616 -0.503853 -0.208335" quat="1 0 0 0" type="mesh" mesh="2c681d7e64e0410d76156f500cd2df798975a25d_part_1"/>
+        <body name="knob">
+          <inertial pos="-0.352616 -0.503853 -0.208335" mass="0.1" diaginertia="0.001 0.001 0.001"/>
+          <geom pos="-0.352616 -0.503853 -0.208335" quat="1 0 0 0" type="mesh" mesh="2c681d7e64e0410d76156f500cd2df798975a25d_part_3"/>
+        </body>
+      </body>
+      <body name="drawer_1" pos="-0.353037 0.503853 0.208334">
+        <inertial pos="0.353037 -0.503853 -0.208334" mass="3" diaginertia="0.03 0.03 0.03"/>
+        <joint name="joint_drawer_1" pos="0 0 0" axis="-1e-06 0 1" type="slide" range="0 0.239645" actuatorfrcrange="-10 10"/>
+        <geom pos="0.353037 -0.503853 -0.208334" quat="1 0 0 0" type="mesh" mesh="2c681d7e64e0410d76156f500cd2df798975a25d_part_2"/>
+        <body name="knob_1">
+          <inertial pos="0.353037 -0.503853 -0.208334" mass="0.1" diaginertia="0.001 0.001 0.001"/>
+          <geom pos="0.353037 -0.503853 -0.208334" quat="1 0 0 0" type="mesh" mesh="2c681d7e64e0410d76156f500cd2df798975a25d_part_4"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+</mujoco>

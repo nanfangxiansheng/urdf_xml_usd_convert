@@ -1,0 +1,237 @@
+{
+    "meta": {
+        "obj_cat": "bookcase",
+        "depth": 1,
+        "n_arti_parts": 2,
+        "n_revolute": 0,
+        "n_continuous": 0,
+        "n_prismatic": 0,
+        "n_screw": 0,
+        "n_diff_parts": 5,
+        "tree_hash": "3e71d1742c353276add4171800bc8b7b"
+    },
+    "diffuse_tree": [
+        {
+            "id": 0,
+            "parent": 4,
+            "name": "drawer",
+            "children": [
+                2
+            ],
+            "joint": {
+                "type": "prismatic",
+                "range": [
+                    0.0,
+                    0.2396457947170301
+                ],
+                "axis": {
+                    "origin": [
+                        0.352616,
+                        0.503853,
+                        0.208335
+                    ],
+                    "direction": [
+                        -1e-06,
+                        0.0,
+                        1.0
+                    ]
+                }
+            },
+            "objs": [
+                "objs/2c681d7e64e0410d76156f500cd2df798975a25d_part_1.obj"
+            ],
+            "aabb": {
+                "center": [
+                    0.35261583,
+                    0.503853245,
+                    0.006347109500000003
+                ],
+                "size": [
+                    0.6805498,
+                    0.22483026999999994,
+                    0.431363781
+                ]
+            },
+            "plys": [
+                "plys/2c681d7e64e0410d76156f500cd2df798975a25d_part_1.ply"
+            ]
+        },
+        {
+            "id": 1,
+            "parent": 4,
+            "name": "drawer",
+            "children": [
+                3
+            ],
+            "joint": {
+                "type": "prismatic",
+                "range": [
+                    0.0,
+                    0.2396454806736347
+                ],
+                "axis": {
+                    "origin": [
+                        -0.353037,
+                        0.503853,
+                        0.208334
+                    ],
+                    "direction": [
+                        -1e-06,
+                        0.0,
+                        1.0
+                    ]
+                }
+            },
+            "objs": [
+                "objs/2c681d7e64e0410d76156f500cd2df798975a25d_part_2.obj"
+            ],
+            "aabb": {
+                "center": [
+                    -0.35303675,
+                    0.503853245,
+                    0.0063465594999999875
+                ],
+                "size": [
+                    0.68054982,
+                    0.22483026999999994,
+                    0.431363781
+                ]
+            },
+            "plys": [
+                "plys/2c681d7e64e0410d76156f500cd2df798975a25d_part_2.ply"
+            ]
+        },
+        {
+            "id": 2,
+            "parent": 0,
+            "name": "knob",
+            "children": [],
+            "joint": {
+                "type": "fixed",
+                "range": [
+                    0,
+                    0.0
+                ],
+                "axis": {
+                    "origin": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "direction": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "objs": [
+                "objs/2c681d7e64e0410d76156f500cd2df798975a25d_part_3.obj"
+            ],
+            "aabb": {
+                "center": [
+                    0.341913725,
+                    0.505755145,
+                    0.23885221
+                ],
+                "size": [
+                    0.02281862999999995,
+                    0.022818589999999972,
+                    0.03682277999999997
+                ]
+            },
+            "plys": [
+                "plys/2c681d7e64e0410d76156f500cd2df798975a25d_part_3.ply"
+            ]
+        },
+        {
+            "id": 3,
+            "parent": 1,
+            "name": "knob",
+            "children": [],
+            "joint": {
+                "type": "fixed",
+                "range": [
+                    0,
+                    0.0
+                ],
+                "axis": {
+                    "origin": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "direction": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "objs": [
+                "objs/2c681d7e64e0410d76156f500cd2df798975a25d_part_4.obj"
+            ],
+            "aabb": {
+                "center": [
+                    -0.34233436500000003,
+                    0.5057551849999999,
+                    0.23885185
+                ],
+                "size": [
+                    0.022818630000000006,
+                    0.02281867000000004,
+                    0.03682276000000001
+                ]
+            },
+            "plys": [
+                "plys/2c681d7e64e0410d76156f500cd2df798975a25d_part_4.ply"
+            ]
+        },
+        {
+            "id": 4,
+            "parent": -1,
+            "name": "base",
+            "children": [
+                0,
+                1
+            ],
+            "joint": {
+                "type": "fixed",
+                "range": [
+                    0,
+                    0.0
+                ],
+                "axis": {
+                    "origin": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "direction": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "objs": [
+                "objs/2c681d7e64e0410d76156f500cd2df798975a25d_part_5.obj"
+            ],
+            "aabb": {
+                "center": [
+                    0.0,
+                    0.0,
+                    -0.017617054999999993
+                ],
+                "size": [
+                    1.44130904,
+                    1.28759078,
+                    0.47929309
+                ]
+            },
+            "plys": [
+                "plys/2c681d7e64e0410d76156f500cd2df798975a25d_part_5.ply"
+            ]
+        }
+    ]
+}

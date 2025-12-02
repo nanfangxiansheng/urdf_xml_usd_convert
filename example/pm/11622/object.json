@@ -1,0 +1,168 @@
+{
+    "meta": {
+        "obj_cat": "Dishwasher",
+        "depth": 1,
+        "n_arti_parts": 2,
+        "n_revolute": 1,
+        "n_continuous": 0,
+        "n_prismatic": 0,
+        "n_screw": 0,
+        "n_diff_parts": 3,
+        "tree_hash": "58916e5534b845124ae54d8a8b4d2c07"
+    },
+    "diffuse_tree": [
+        {
+            "id": 0,
+            "parent": 1,
+            "name": "door",
+            "children": [
+                2
+            ],
+            "joint": {
+                "type": "revolute",
+                "range": [
+                    0,
+                    90
+                ],
+                "axis": {
+                    "origin": [
+                        0.5087039999999998,
+                        -0.5319095520307777,
+                        0.4495296033196075
+                    ],
+                    "direction": [
+                        1,
+                        0,
+                        0
+                    ]
+                }
+            },
+            "objs": [
+                "objs/new-2.obj",
+                "objs/original-16.obj"
+            ],
+            "aabb": {
+                "center": [
+                    -0.014964491128921509,
+                    0.11526650190353394,
+                    0.4515349864959717
+                ],
+                "size": [
+                    1.047336995601654,
+                    1.3091709613800049,
+                    0.2249239683151245
+                ]
+            },
+            "plys": [
+                "plys/new-2.ply",
+                "plys/original-16.ply"
+            ]
+        },
+        {
+            "id": 1,
+            "parent": -1,
+            "name": "base",
+            "children": [
+                0
+            ],
+            "joint": {
+                "type": "fixed",
+                "range": [
+                    0,
+                    0.0
+                ],
+                "axis": {
+                    "origin": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "direction": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                }
+            },
+            "objs": [
+                "objs/new-0.obj",
+                "objs/new-3.obj",
+                "objs/original-3.obj"
+            ],
+            "aabb": {
+                "center": [
+                    -0.014964491128921509,
+                    0.029568016529083252,
+                    -0.00440099835395813
+                ],
+                "size": [
+                    1.047336995601654,
+                    1.4868860244750977,
+                    1.0233359932899475
+                ]
+            },
+            "plys": [
+                "plys/new-0.ply",
+                "plys/new-3.ply",
+                "plys/original-3.ply"
+            ]
+        },
+        {
+            "id": 2,
+            "parent": 0,
+            "name": "handle",
+            "children": [],
+            "joint": {
+                "type": "fixed",
+                "range": [
+                    0,
+                    0.0
+                ]
+            },
+            "objs": [
+                "objs/original-9.obj",
+                "objs/original-17.obj",
+                "objs/original-14.obj",
+                "objs/original-15.obj",
+                "objs/original-8.obj",
+                "objs/original-7.obj",
+                "objs/original-6.obj",
+                "objs/original-5.obj",
+                "objs/original-1.obj",
+                "objs/original-18.obj",
+                "objs/original-10.obj",
+                "objs/original-13.obj",
+                "objs/original-12.obj",
+                "objs/original-11.obj"
+            ],
+            "aabb": {
+                "center": [
+                    -0.014965012669563293,
+                    0.7022114992141724,
+                    0.5436744838953018
+                ],
+                "size": [
+                    0.977513998746872,
+                    0.13091695308685303,
+                    0.12452897429466248
+                ]
+            },
+            "plys": [
+                "plys/original-9.ply",
+                "plys/original-17.ply",
+                "plys/original-14.ply",
+                "plys/original-15.ply",
+                "plys/original-8.ply",
+                "plys/original-7.ply",
+                "plys/original-6.ply",
+                "plys/original-5.ply",
+                "plys/original-1.ply",
+                "plys/original-18.ply",
+                "plys/original-10.ply",
+                "plys/original-13.ply",
+                "plys/original-12.ply",
+                "plys/original-11.ply"
+            ]
+        }
+    ]
+}
