@@ -18,7 +18,7 @@
 
 然后再把其转换为urdf文件：调用的文件是**convert_object_json_to_urdf_pm.py**，和一个批量转换的脚本**run_conversion.py**。
 
-随后需要对转换后的urdf文件进行检查，排除几何上的错误，这里运行的是**geom_fixing.py**文件。
+随后需要对转换后的urdf文件进行检查，排除几何上的错误，这里运行的是**geom_fixing.py**文件。此外还发现应当再把其obj文件的名字从"-"变为"_"否则后面有可能会出现导入物体部分缺失的情况，这里用的python脚本是rename_obj_files_batch.py。
 
 ## URDF转换为XML并FIX
 
@@ -56,9 +56,10 @@ python ./convert_mjcf.py model_fixed.xml model.usda。
 一共写了五个批量转换脚本。分别对应这五个步骤：
 - 1.转换所有object.json为urdf:**convert_json_to_urdf_batch.py**
 - 2.修复转换后的urdf和.obj文件中的几何错误:**fix_urdf_geoms_batch.py**
-- 3.转换所有urdf为xml:**convert_urdf_to_xml_batch.py**
-- 4.修复所有xml中的obj路径从绝对路径变为相对路径:**fix_xml_batch.sh**
-- 5.转换所有xml为usda:**convert_xml_to_usda_batch.py**
+- 3.把obj文件路径中的"-"变为"_":**rename_obj_files_batch.py**
+- 4.转换所有urdf为xml:**convert_urdf_to_xml_batch.py**
+- 5.修复所有xml中的obj路径从绝对路径变为相对路径:**fix_xml_batch.sh**
+- 6.转换所有xml为usda:**convert_xml_to_usda_batch.py**
 
 注意：对于上面所有的批量处理脚本，都是不设置输入参数的，在使用前应当对其中的路径等信息自行处理。
 ## 转换成功的示例：
