@@ -1,117 +1,192 @@
-#!/usr/bin/env python3
-"""
-处理所有 model_fixed.urdf 文件中引用的 OBJ 文件几何形状
-"""
-
 import os
-import xml.etree.ElementTree as ET
-import subprocess
-import sys
-from pathlib import Path
+import re
 
-def extract_obj_files_from_urdf(urdf_path):
-    """从URDF文件中提取所有引用的OBJ文件路径"""
-    obj_files = set()
+def rename_obj_files(objs_directory):
+    """
+    将objs目录中所有包含横线的obj文件名中的横线替换为下划线
     
-    try:
-        tree = ET.parse(urdf_path)
-        root = tree.getroot()
+    Args:
+        objs_directory (str): objs目录路径
         
-        # 查找所有mesh元素中的filename属性
-        for mesh in root.findall('.//mesh'):
-            filename = mesh.get('filename')
-            if filename and filename.endswith('.obj'):
-                # 构建完整的OBJ文件路径
-                full_path = os.path.join(os.path.dirname(urdf_path), filename)
-                obj_files.add(full_path)
-                
-    except Exception as e:
-        print(f"警告: 无法解析 {urdf_path}: {e}")
-        
-    return obj_files
-
-def find_all_model_fixed_urdf(root_dir):
-    """查找所有model_fixed.urdf文件"""
-    urdf_files = []
-    for dirpath, dirnames, filenames in os.walk(root_dir):
-        for filename in filenames:
-            if filename == 'model_fixed.urdf':
-                urdf_files.append(os.path.join(dirpath, filename))
-    return urdf_files
-
-def process_obj_files_with_geom_fixing(obj_files, geom_fixing_script):
-    """使用geom_fixing.py处理OBJ文件"""
-    if not obj_files:
-        print("没有找到需要处理的OBJ文件")
-        return
-        
-    print(f"总共找到 {len(obj_files)} 个OBJ文件需要处理")
+    Returns:
+        dict: 旧文件名到新文件名的映射
+    """
+    # 存储文件名映射关系
+    file_mapping = {}
     
-    # 创建临时目录列表，以便geom_fixing.py处理
-    temp_dirs = set()
-    for obj_file in obj_files:
-        temp_dirs.add(os.path.dirname(obj_file))
+    # 检查目录是否存在
+    if not os.path.exists(objs_directory):
+        return file_mapping
     
-    print(f"涉及 {len(temp_dirs)} 个目录")
-    
-    # 对每个目录运行geom_fixing.py
-    processed = 0
-    for directory in temp_dirs:
-        print(f"\n处理目录: {directory}")
-        try:
-            # 使用geom_fixing.py处理整个目录
-            result = subprocess.run([
-                sys.executable, geom_fixing_script, directory
-            ], capture_output=True, text=True, cwd=os.path.dirname(geom_fixing_script))
+    # 遍历objs目录中的所有文件
+    for filename in os.listdir(objs_directory):
+        # 检查是否是obj或mtl文件且文件名包含横线
+        if (filename.endswith('.obj') ) and '-' in filename:
+            # 生成新文件名，将横线替换为下划线
+            new_filename = filename.replace('-', '_')
             
-            if result.returncode == 0:
-                print(f"成功处理目录: {directory}")
-                print(result.stdout)
-            else:
-                print(f"处理目录失败: {directory}")
-                print(result.stderr)
-                
-            processed += 1
-            print(f"进度: {processed}/{len(temp_dirs)}")
+            # 构造完整路径
+            old_filepath = os.path.join(objs_directory, filename)
+            new_filepath = os.path.join(objs_directory, new_filename)
             
-        except Exception as e:
-            print(f"处理目录 {directory} 时出错: {e}")
+            # 重命名文件
+            os.rename(old_filepath, new_filepath)
+            print(f"重命名文件: {filename} -> {new_filename}")
+            
+            # 记录映射关系
+            file_mapping[filename] = new_filename
     
-    print(f"\n完成处理 {processed}/{len(temp_dirs)} 个目录")
+    return file_mapping
+
+def rename_ply_files(plys_directory):
+    """
+    将plys目录中所有包含横线的ply文件名中的横线替换为下划线
+    
+    Args:
+        plys_directory (str): plys目录路径
+        
+    Returns:
+        dict: 旧文件名到新文件名的映射
+    """
+    # 存储文件名映射关系
+    file_mapping = {}
+    
+    # 检查目录是否存在
+    if not os.path.exists(plys_directory):
+        return file_mapping
+    
+    # 遍历plys目录中的所有文件
+    for filename in os.listdir(plys_directory):
+        # 检查是否是ply文件且文件名包含横线
+        if filename.endswith('.ply') and '-' in filename:
+            # 生成新文件名，将横线替换为下划线
+            new_filename = filename.replace('-', '_')
+            
+            # 构造完整路径
+            old_filepath = os.path.join(plys_directory, filename)
+            new_filepath = os.path.join(plys_directory, new_filename)
+            
+            # 重命名文件
+            os.rename(old_filepath, new_filepath)
+            print(f"重命名文件: {filename} -> {new_filename}")
+            
+            # 记录映射关系
+            file_mapping[filename] = new_filename
+    
+    return file_mapping
+
+def update_urdf_references(urdf_file_path, obj_file_mapping):
+    """
+    更新URDF文件中对obj文件和ply文件的引用
+    
+    Args:
+        urdf_file_path (str): URDF文件路径
+        obj_file_mapping (dict): obj旧文件名到新文件名的映射
+        ply_file_mapping (dict): ply旧文件名到新文件名的映射
+    """
+    # 检查文件是否存在
+    if not os.path.exists(urdf_file_path):
+        return 0
+    
+    # 读取URDF文件内容
+    with open(urdf_file_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+    
+    # 统计替换次数
+    replacement_count = 0
+    
+    # 根据映射关系替换obj文件名
+    for old_name, new_name in obj_file_mapping.items():
+        # 创建要查找的旧引用和新引用
+        old_reference = f'filename="objs/{old_name}"'
+        new_reference = f'filename="objs/{new_name}"'
+        
+        # 执行替换并统计次数
+        content, count = re.subn(re.escape(old_reference), new_reference, content)
+        replacement_count += count
+    
+
+    
+    # 将更新后的内容写回文件
+    with open(urdf_file_path, 'w', encoding='utf-8') as f:
+        f.write(content)
+    
+    if replacement_count > 0:
+        print(f"在 {urdf_file_path} 中完成了 {replacement_count} 处替换")
+    
+    return replacement_count
+
+def process_model_directory(model_dir):
+    """
+    处理单个模型目录中的所有相关文件
+    
+    Args:
+        model_dir (str): 模型目录路径
+    """
+    objs_directory = os.path.join(model_dir, "objs")
+    plys_directory = os.path.join(model_dir, "plys")
+    urdf_file_path = os.path.join(model_dir, "model_pm.urdf")
+    
+    print(f"\n正在处理目录: {model_dir}")
+    
+    # 重命名obj文件
+    obj_file_mapping = rename_obj_files(objs_directory)
+    
+    # 重命名ply文件
+    
+    total_renamed = len(obj_file_mapping) 
+    if total_renamed > 0:
+        print(f"完成重命名 {len(obj_file_mapping)} 个obj文件")
+        
+        # 更新URDF文件中的引用
+        replacement_count = update_urdf_references(urdf_file_path, obj_file_mapping)
+        if replacement_count > 0:
+            print(f"总共更新了 {replacement_count} 处引用")
+    else:
+        print("没有找到需要重命名的文件")
+
+def process_all_models(base_directory):
+    """
+    递归处理base_directory下所有的模型目录
+    
+    Args:
+        base_directory (str): 基础目录路径
+    """
+    # 遍历所有模型类别目录
+    for category in os.listdir(base_directory):
+        category_path = os.path.join(base_directory, category)
+        
+        # 确保是一个目录
+        if os.path.isdir(category_path):
+            print(f"\n处理模型类别: {category}")
+            
+            # 遍历该类别下的所有模型目录
+            for model in os.listdir(category_path):
+                model_path = os.path.join(category_path, model)
+                
+                # 确保是一个模型目录（包含objs或plys子目录）
+                if os.path.isdir(model_path):
+                    objs_dir = os.path.join(model_path, "objs")
+                    
+                    # 如果该目录包含objs或plys子目录，则处理它
+                    if os.path.exists(objs_dir) :
+                        try:
+                            process_model_directory(model_path)
+                        except Exception as e:
+                            print(f"处理目录 {model_path} 时出错: {e}")
 
 def main():
-    # 定义路径
-    articulated_assets_dir = '/home/blackbird/GYH/out_pm'
-    geom_fixing_script = '/home/blackbird/GYH/urdf_xml_usd_convert/change_format/geom_fixing.py'
+    # 设置路径
+    base_directory = "/home/blackbird/GYH/pm_test"
     
-    # 检查必要文件和目录是否存在
-    if not os.path.exists(articulated_assets_dir):
-        print(f"错误: 目录 {articulated_assets_dir} 不存在")
-        return 1
-        
-    if not os.path.exists(geom_fixing_script):
-        print(f"错误: 脚本 {geom_fixing_script} 不存在")
-        return 1
+    # 检查基础目录是否存在
+    if not os.path.exists(base_directory):
+        print(f"错误: 目录 {base_directory} 不存在")
+        return
     
-    # 查找所有model_fixed.urdf文件
-    print("正在查找所有model_fixed.urdf文件...")
-    urdf_files = find_all_model_fixed_urdf(articulated_assets_dir)
-    print(f"找到 {len(urdf_files)} 个model_fixed.urdf文件")
-    
-    # 从URDF文件中提取OBJ文件路径
-    print("正在从URDF文件中提取OBJ文件路径...")
-    all_obj_files = set()
-    for urdf_file in urdf_files:
-        obj_files = extract_obj_files_from_urdf(urdf_file)
-        all_obj_files.update(obj_files)
-        print(f"  {urdf_file}: 提取到 {len(obj_files)} 个OBJ文件")
-    
-    # 处理OBJ文件
-    print("\n开始处理OBJ文件几何形状...")
-    process_obj_files_with_geom_fixing(all_obj_files, geom_fixing_script)
-    
-    print("\n所有处理完成!")
-    return 0
+    print("开始递归处理所有模型目录...")
+    process_all_models(base_directory)
+    print("\n所有操作已完成!")
 
-if __name__ == '__main__':
-    sys.exit(main())
+if __name__ == "__main__":
+    main()
