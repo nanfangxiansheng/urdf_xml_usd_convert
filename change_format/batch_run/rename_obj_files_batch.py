@@ -21,7 +21,7 @@ def rename_obj_files(objs_directory):
     # 遍历objs目录中的所有文件
     for filename in os.listdir(objs_directory):
         # 检查是否是obj或mtl文件且文件名包含横线
-        if (filename.endswith('.obj') or filename.endswith('.mtl')) and '-' in filename:
+        if (filename.endswith('.obj') ) and '-' in filename:
             # 生成新文件名，将横线替换为下划线
             new_filename = filename.replace('-', '_')
             
